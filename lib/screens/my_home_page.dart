@@ -1,105 +1,121 @@
-import 'dart:developer';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/src/foundation/key.dart';
-import 'package:flutter/src/widgets/framework.dart';
-import 'package:get/state_manager.dart';
-import 'package:intl/intl.dart';
+import 'package:get/get.dart';
 import 'package:nasa_app/controllers/asteroid_controller.dart';
+import 'package:nasa_app/widgets/date_widget.dart';
 
 class MyHomePage extends GetWidget<AsteroidController> {
-   MyHomePage({Key? key}) : super(key: key);
-
-  
- 
+  MyHomePage({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
-        children: [
-          SizedBox(
-            height:  MediaQuery.of(context).size.height * .20,
-            child: controller.obx((state) {
-        return ListView.builder(
-          itemCount: state!.length,
-          itemBuilder: (context, index) {
-            List data = state.keys.toList();
-             
-           
-          return GestureDetector(
-            onTap: () {
-              controller.visible.value = true;
-              if(index==0){
-                 controller.firstOne.value = state.values.first;
-              }
-              if(index == 1) {
-                 controller.firstOne.value = state.values.last;
-              }
-             
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(4.0),
-              child: Card(
-                margin: EdgeInsets.all(8.0),
-                child: Row(
-                  children: [
-                    const Text("Date :"),
-                    Text(data[index]),
-                    Spacer(),
-                    Container(
-                      decoration: BoxDecoration(
-                        color: Colors.greenAccent,
-                      ),
-                      child: Text("Click Here to see the List of Asteroid")),
-                  ],
-                ),
+      body: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
+        child: Column(
+          children: [
+            controller.obx(
+              (state) {
+                return SizedBox(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: state!.nearEarthObjects!.keys.toList().length,
+                    itemBuilder: (context, index) {
+                      List<String> data = state.nearEarthObjects!.keys.toList();
+                      return Column(
+                        children: [
+                          GestureDetector(
+                            onTap: () {
+                              controller.visible.value =
+                                  !controller.visible.value;
+                              if (index == 0)
+                                controller.firstOne =
+                                    state.nearEarthObjects!.values.first;
+                              if (index == 1)
+                                controller.firstOne =
+                                    state.nearEarthObjects!.values.last;
+                            },
+                            child: DateWidget(
+                              date: data[index],
+                            ),
+                          ),
+                        ],
+                      );
+                    },
+                  ),
+                );
+              },
+              onError: (error) => Text("$error"),
+              onLoading: const Center(
+                child: CircularProgressIndicator(),
               ),
             ),
-          );
-          
-          
-        },
-      );
-        
-      },
-      onError: (error) => Text("$error"),
-      onLoading: const Center(child: CircularProgressIndicator(),),
-      )
-      
-      ,
-          ),
-          controller.visible.value ? SizedBox(
-            height: MediaQuery.of(context).size.height * .80,
-            child: Obx(()=>  ListView.builder(
-                itemCount: controller.firstOne.length,
-                itemBuilder: (context, index) {
-                return Card(
-                  margin: const EdgeInsets.all(8),
-                  child: Container(child:Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(controller.firstOne[index]['name']),
+            ToggleButtons(
+              direction: Axis.horizontal,
+              onPressed: (int index) {
+                // The button that is tapped is set to true, and the others to false.
+                for (int i = 0; i < controller.selecteOrder.length; i++) {
+                  controller.selecteOrder[i] = i == index;
+                  controller.firstOne.sort((a, b) => a.absoluteMagnitudeH.toString().compareTo(b.absoluteMagnitudeH.toString()),);
+                }
+
+              },
+              borderRadius: const BorderRadius.all(Radius.circular(8)),
+              selectedBorderColor: Colors.blue[700],
+              selectedColor: Colors.white,
+              fillColor: Colors.blue[200],
+              color: Colors.blue[400],
+              isSelected: controller.selecteOrder,
+              children: controller.order,
+            ),
+            Obx(() => controller.visible.value
+                ? Container(
+                    height: MediaQuery.of(context).size.height,
+                    child: ListView.builder(
+                      physics: const ClampingScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: controller.firstOne.length,
+                      itemBuilder: (context, index) {
+                        return Container(
+                          height: MediaQuery.of(context).size.height * 0.08,
+                          decoration: const BoxDecoration(
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black,
+                                blurRadius: 20.0,
+                              ),
+                            ],
+                          ),
+                          child: Card(
+                            child: Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceAround,
+                                    children: [
+                                      Text(controller.firstOne[index].name!),
+                                      Text(controller
+                                          .firstOne[index]
+                                          .closeApproachData![0]
+                                          .closeApproachDate
+                                          .toString())
+                                    ],
+                                  ),
+                                  Text(controller
+                                      .firstOne[index].absoluteMagnitudeH
+                                      .toString())
+                                ],
+                              ),
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(controller.firstOne[index]['absolute_magnitude_h'].toString()),
-                    ),
-                     Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(controller.firstOne[index]['close_approach_data'][0]['close_approach_date'].toString()),
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text(controller.firstOne[index]['is_potentially_hazardous_asteroid'].toString()),
-                    ),
-                  ],
-                ) ),);
-              },),)
-          ): Container(),
-        ],
+                  )
+                : Container()),
+          ],
+        ),
       ),
     );
   }

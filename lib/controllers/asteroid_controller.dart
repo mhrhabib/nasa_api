@@ -1,13 +1,21 @@
-import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:get/state_manager.dart';
 import 'package:nasa_app/models/asteroid.dart';
 import 'package:nasa_app/repository/asteroid_repo.dart';
 
-class AsteroidController extends GetxController with StateMixin< Map<String, dynamic>>{
+class AsteroidController extends GetxController with StateMixin<Asteroid>{
 
 final AsteroidRepo _asteroidRepo = AsteroidRepo();
  var visible = false.obs;
- var firstOne = [].obs;
+ List<NearEarthObject> firstOne = <NearEarthObject>[].obs;
+
+ List<Widget> order = <Widget>[
+    Text('Accending'),
+    Text('Decending'),
+  ];
+
+  final List<bool> selecteOrder = <bool>[false, true].obs;
+ 
 
  void getAsteroidData()async{
   RxStatus.loading();
