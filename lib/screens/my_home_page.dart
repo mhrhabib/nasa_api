@@ -28,11 +28,15 @@ class MyHomePage extends GetWidget<AsteroidController> {
                               controller.visible.value =
                                   !controller.visible.value;
                               if (index == 0)
-                                controller.firstOne =
+                                {
+                                  controller.firstOne =
                                     state.nearEarthObjects!.values.first;
+                                }
                               if (index == 1)
-                                controller.firstOne =
+                               {
+                                 controller.firstOne =
                                     state.nearEarthObjects!.values.last;
+                               }
                             },
                             child: DateWidget(
                               date: data[index],
@@ -56,6 +60,8 @@ class MyHomePage extends GetWidget<AsteroidController> {
                 for (int i = 0; i < controller.selecteOrder.length; i++) {
                   controller.selecteOrder[i] = i == index;
                   controller.firstOne.sort((a, b) => a.absoluteMagnitudeH.toString().compareTo(b.absoluteMagnitudeH.toString()),);
+
+                 
                 }
 
               },
